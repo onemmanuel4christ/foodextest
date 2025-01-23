@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { navData } from "../data/navData";
-import { motion } from "motion/react";
+import { menuCards, navData } from "../data/navData";
+import { motion, AnimatePresence } from "motion/react";
 import SocialIcon from "./SocialIcon";
+import MenuCard from "./MenuCard";
 
-const StartSvg = () => {
+const StartSvg = React.memo(() => {
   return (
     <svg
       width="25"
@@ -18,9 +19,9 @@ const StartSvg = () => {
       />
     </svg>
   );
-};
+});
 
-const MenuSvg = () => {
+const MenuSvg = React.memo(() => {
   return (
     <svg
       width="18"
@@ -35,8 +36,9 @@ const MenuSvg = () => {
       />
     </svg>
   );
-};
-const FbSvg = () => {
+});
+
+const FbSvg = React.memo(() => {
   return (
     <svg
       width="19"
@@ -51,8 +53,9 @@ const FbSvg = () => {
       />
     </svg>
   );
-};
-const XSvg = () => {
+});
+
+const XSvg = React.memo(() => {
   return (
     <svg
       width="21"
@@ -67,8 +70,8 @@ const XSvg = () => {
       />
     </svg>
   );
-};
-const ISvg = () => {
+});
+const ISvg = React.memo(() => {
   return (
     <svg
       width="18"
@@ -83,13 +86,15 @@ const ISvg = () => {
       />
     </svg>
   );
-};
+});
 
 const Hero: React.FC = () => {
   const [displayText, setDisplayText] = useState("Asap!");
   const [svgVisible, setSvgVisible] = useState(true);
   const texts = ["Asap!", "kia Kia!", "Now!"];
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const cardsToShow = 5;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -105,6 +110,21 @@ const Hero: React.FC = () => {
 
     return () => clearInterval(interval);
   }, []);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex(
+        (prevIndex) =>
+          (prevIndex + 1) % Math.ceil(menuCards.length / cardsToShow)
+      );
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [menuCards.length]);
+
+  const displayedCards = menuCards.slice(
+    currentIndex * cardsToShow,
+    currentIndex * cardsToShow + cardsToShow
+  );
 
   return (
     <motion.div className="flex flex-col sm:flex-row flex-wrap container mx-auto p-4">
@@ -136,7 +156,7 @@ const Hero: React.FC = () => {
       </div>
       <nav className="sm:hidden flex items-center justify-between w-full">
         <img src="/Logo.png" alt="logo" className="h-[56px] w-[68px]" />
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4 ">
           <button className="bg-[#D87023] text-white rounded-[32px] px-10 py-5 border-[2px] border-white font-[700] text-[12px] leading-[18px]">
             JOIN WAITLIST
           </button>
@@ -155,7 +175,7 @@ const Hero: React.FC = () => {
         <div className="my-[10rem]">
           <motion.span
             className="text-[#FFFFFF] text-[15px] font-[400] leading-[24px] flex items-center mx-auto gap-5"
-            style={{ maxWidth: "90vw" }} // Added maxWidth to constrain on mobile
+            style={{ maxWidth: "90vw" }}
             animate={{ x: ["-100px", "200px", "-100px"] }}
             transition={{ duration: 10, repeat: Infinity }}
           >
@@ -173,6 +193,7 @@ const Hero: React.FC = () => {
                 exit={{ opacity: 0, y: 20 }}
                 transition={{ duration: 2, ease: "easeInOut" }}
                 className="transition-all"
+                style={{ fontFamily: "Courgette" }}
               >
                 {displayText}
               </motion.span>
@@ -184,7 +205,7 @@ const Hero: React.FC = () => {
                     ? { width: "100%", scaleX: 1 }
                     : { width: 0, scaleX: 0 }
                 }
-                transition={{ duration: 10 }}
+                transition={{ duration: 1 }}
               >
                 <motion.svg
                   initial={{ scaleX: 0 }}
@@ -213,13 +234,13 @@ const Hero: React.FC = () => {
               The patient dog eats left overs. Be the first to know when we
               launch. Join our Waitlist 😎
             </p>
-            <span className="flex flex-col sm:flex-row items-center gap-3">
+            <span className="flex flex-col sm:flex-row items-center gap-3 mb-[19rem]">
               <input
                 type="email"
                 placeholder="Enter your rmail"
                 className="rounded-[12px] p-3 text-[1rem] w-[327px] outline-none"
-                onFocus={() => setIsInputFocused(true)} // Set focus state to true
-                onBlur={() => setIsInputFocused(false)} // Set focus state to false
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
               />
               <button className="bg-[#009F79] text-white border-[2px] border-white rounded-[56px] py-3 px-10">
                 JOIN WAITLIST
@@ -227,10 +248,37 @@ const Hero: React.FC = () => {
             </span>
           </motion.div>
         </div>
+
         <img
           src="/ellpse.png"
           alt="logo"
           className="h-[368px] w-[368px] absolute left-0 bottom-0 hidden sm:block"
+        />
+        <div className="absolute bottom-[30px] left-0 flex gap-8">
+          <AnimatePresence>
+            <motion.div
+              key={currentIndex}
+              animate={{ x: ["-200px", "200px", "-200px"] }}
+              transition={{ duration: 10 }}
+              className="flex gap-8"
+            >
+              {displayedCards.map((card, index) => (
+                <MenuCard
+                  key={index}
+                  title={card.title}
+                  image={card.image}
+                  category={card.category}
+                  likes={card.likes}
+                  price={card.price}
+                />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+        </div>
+        <img
+          src="/span.png"
+          alt="logo"
+          className="h-[409px] w-[253px] absolute right-[10%] bottom-0 hidden sm:block"
         />
       </div>
     </motion.div>
